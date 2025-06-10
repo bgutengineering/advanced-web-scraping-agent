@@ -1,0 +1,215 @@
+# Web Scraping Agent Configuration Template
+# Orange Pi 5 Max Optimized
+
+# System Configuration
+system:
+  name: "web-scraping-agent"
+  version: "1.0.0"
+  
+  # Hardware Optimization
+  hardware:
+    max_concurrent_browsers: 4  # Adjust based on available RAM
+    max_concurrent_tasks: 8     # Adjust based on CPU cores
+    memory_limit: "4GB"        # Per browser instance
+    enable_gpu_acceleration: true
+
+# API Keys Configuration
+# Up to 10 keys per provider for fallback system
+api_keys:
+  gemini:
+    primary: "YOUR_PRIMARY_GEMINI_KEY"
+    fallback:
+      - "FALLBACK_KEY_1"
+      - "FALLBACK_KEY_2"
+      # Add up to 8 more fallback keys
+    context_window: 8192  # Maximum context window size
+    retry_delay: 1000    # Milliseconds between key switches
+    
+  serp_api:
+    primary: "YOUR_SERP_API_KEY"
+    fallback:
+      - "FALLBACK_KEY_1"
+      # Add more fallback keys
+    
+  apify:
+    primary: "YOUR_APIFY_KEY"
+    fallback: []  # Add fallback keys if needed
+    
+  exa_ai:
+    primary: "YOUR_EXA_AI_KEY"
+    fallback: []  # Add fallback keys if needed
+    
+  goose_cse:
+    primary: "YOUR_GOOSE_CSE_KEY"
+    fallback: []  # Add fallback keys if needed
+
+# Proxy Configuration
+proxies:
+  enabled: true
+  rotation_interval: 300  # Seconds
+  retry_attempts: 3
+  providers:
+    - type: "http"
+      list:
+        - "http://proxy1:port"
+        - "http://proxy2:port"
+    - type: "socks5"
+      list:
+        - "socks5://proxy1:port"
+    # Add more proxy providers as needed
+
+# Cache Configuration
+cache:
+  enabled: true
+  type: "redis"  # or "sqlite"
+  ttl: 3600      # Default TTL in seconds
+  max_size: "1GB"
+  categories:
+    job_market:
+      ttl: 1800  # 30 minutes
+    ecommerce:
+      ttl: 3600  # 1 hour
+    real_estate:
+      ttl: 7200  # 2 hours
+    # Add custom TTL for other categories
+
+# Rate Limiting
+rate_limits:
+  # Optional rate limits per provider
+  gemini:
+    requests_per_minute: 60
+    requests_per_hour: 3000
+  apify:
+    requests_per_minute: 30
+  # Add limits for other providers as needed
+
+# Category-Specific Configurations
+categories:
+  job_market:
+    tools:
+      primary: "playwright"
+      fallback: ["apify", "serp_api"]
+    features:
+      proxy_required: true
+      js_rendering: true
+      captcha_handling: true
+    settings:
+      timeout: 30000
+      wait_for: "#job-listings"
+      
+  ecommerce:
+    tools:
+      primary: "playwright"
+      fallback: ["cheerio", "apify"]
+    features:
+      proxy_required: true
+      js_rendering: "optional"
+      dynamic_loading: true
+    settings:
+      timeout: 20000
+      
+  real_estate:
+    tools:
+      primary: "playwright"
+      fallback: ["apify", "goose_cse"]
+    features:
+      proxy_required: true
+      js_rendering: true
+      map_handling: true
+    settings:
+      timeout: 25000
+      
+  content_aggregation:
+    tools:
+      primary: "cheerio"
+      fallback: ["playwright"]
+    features:
+      proxy_required: false
+      js_rendering: "optional"
+    settings:
+      timeout: 15000
+      
+  research_docs:
+    tools:
+      primary: "cheerio"
+      fallback: ["playwright", "exa_ai"]
+    features:
+      proxy_required: false
+      pdf_handling: true
+    settings:
+      timeout: 20000
+      
+  financial:
+    tools:
+      primary: "playwright"
+      fallback: ["serp_api"]
+    features:
+      proxy_required: true
+      js_rendering: true
+      real_time: true
+    settings:
+      timeout: 15000
+      
+  travel:
+    tools:
+      primary: "playwright"
+      fallback: ["apify"]
+    features:
+      proxy_required: true
+      js_rendering: true
+      session_handling: true
+    settings:
+      timeout: 30000
+      
+  lead_generation:
+    tools:
+      primary: "playwright"
+      fallback: ["cheerio", "serp_api"]
+    features:
+      proxy_required: true
+      data_validation: true
+    settings:
+      timeout: 20000
+      
+  regulatory:
+    tools:
+      primary: "cheerio"
+      fallback: ["playwright", "exa_ai"]
+    features:
+      proxy_required: false
+      pdf_handling: true
+    settings:
+      timeout: 25000
+      
+  market_research:
+    tools:
+      primary: "playwright"
+      fallback: ["apify", "gemini"]
+    features:
+      proxy_required: true
+      sentiment_analysis: true
+    settings:
+      timeout: 25000
+
+# Task Scheduling
+scheduler:
+  enabled: true
+  max_queued_tasks: 1000
+  priorities:
+    - name: "high"
+      max_concurrent: 4
+    - name: "medium"
+      max_concurrent: 2
+    - name: "low"
+      max_concurrent: 1
+  retry:
+    max_attempts: 3
+    delay: 5000  # Milliseconds between retries
+
+# Logging Configuration
+logging:
+  level: "info"  # debug, info, warn, error
+  file: "scraper.log"
+  rotate: true
+  max_size: "100MB"
+  max_files: 5
